@@ -1,0 +1,29 @@
+{
+   "background": {
+      "persistent": false,
+      "scripts": [ "background.js" ]
+   },
+   "browser_action": {
+      "default_icon": {
+         "38": "echo-38x38.png"
+      },
+      "default_popup": "popup.html",
+      "default_title": "Coincidence Detector"
+   },
+   "content_scripts": [ {
+      "js": [ "myscript.js" ],
+      "matches": [ "*://*/*" ],
+      "run_at": "document_end"
+   } ],
+   "description": "Detects Total Coincidences",
+   "homepage_url": "https://coincidencedetector.com/",
+   "icons": {
+      "16": "echo-16x16.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuu14GNNMaaMgXlHt9D1jzwQYUL+afdnVa/zl+J0k81YumANVQljT2iBy9i3eDhIpUt0mcejl7BBbLLYTJJ7TpTRJFWswow6Hjlxhfr/XK+kEXqWPSh8VKhAhMlM+fsPofEbuRVyDAzDGmovolpsE+7dR12g/eERhYCiHwz73Ofg3ImX4Qx6VwTlJwkPcgLsKVeopx6ufEWdsFPM9WtwTu2llw2Zc2PPKqT/fznA95kytFA5MowABFluwh7wu0n2kSSIgT/AOTS3vU+rnRPrAM7Hos8NYtzY/hbr7KogrhPePAhWMXJGPXNoZnEYFh7K3u1r8o6ZkqzOgIsdDht/NgwIDAQAB",
+   "manifest_version": 2,
+   "name": "Coincidence Detector",
+   "permissions": [ "activeTab", "contextMenus", "*://judas.watch/*", "*://bit.surf/*", "*://gateway.ipfs.io/*", "*://coincidencedetector.com/*" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "14.88.28"
+}
