@@ -44,9 +44,7 @@ function wordCountGT(n) {
 }
 
 function buildPattern(list) {
-  return enableSingle
-    ? '\\b(' + list.join('|') + ')\\b'
-    : '\\b(' + list.filter(wordCountGT(1)).join('|') + ')\\b';
+  return '\\b(' + list.join('|') + ')\\b';
 }
 
 function load(url, cb) {

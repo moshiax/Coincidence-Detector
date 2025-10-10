@@ -1,47 +1,31 @@
 function getActiveTabHostname(cb) {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     var tab = tabs[0];
-    var url = tab.url;
     var hostname = "";
-    if (url) {
-      // http://stackoverflow.com/questions/3689423/google-chrome-plugin-how-to-get-domain-from-url-tab-url
-      hostname = url.match(/^[\w-]+:\/*\[?([\w\.:-]+)\]?(?::\d+)?/)[1];
+    if (tab.url) {
+      hostname = tab.url.match(/^[\w-]+:\/*\[?([\w\.:-]+)\]?(?::\d+)?/)[1];
     }
     cb(null, hostname);
   });
 }
 
-/**
- * Utility functions for localStorage
- */
 var storage = {
   get: function(key) {
     var val = localStorage.getItem(key);
-    var res;
-    if (val == undefined) {
-      return val;
-    } else {
-      try {
-        res = JSON.parse(val);
-      }
-      catch (err) {
-        res = undefined;
-      }
-      return res;
+    if (val === undefined) return val;
+    try {
+      return JSON.parse(val);
+    } catch {
+      return undefined;
     }
   },
   set: function(key, val) {
-    var storedVal = JSON.stringify(val);
-    localStorage[key] = storedVal;
+    localStorage[key] = JSON.stringify(val);
     return val;
   },
   toggle: function(key) {
     var val = this.get(key);
-    if (val) {
-      return this.set(key, false);
-    } else {
-      return this.set(key, true);
-    }
+    return this.set(key, !val);
   }
 };
 
@@ -49,63 +33,20 @@ var cc = String.fromCharCode;
 
 function displayToggleState(toggleState) {
   getActiveTabHostname(function(err, hostname) {
-    if (localStorage[hostname]) {
-      toggleState.textContent = cc(9744);
-    } else {
-      toggleState.textContent = cc(9745);
-    }
+    toggleState.textContent = localStorage[hostname] ? cc(9744) : cc(9745);
   });
-}
-
-function displayToggleCaseState(toggleCaseState) {
-  var v = storage.get('caseSensitivity');
-  if (v) {
-    toggleCaseState.textContent = cc(9745);
-  } else {
-    toggleCaseState.textContent = cc(9744);
-  }
-}
-
-function displayToggleTreeState(toggleTreeState) {
-  var v = storage.get('enableTree');
-  if (v) {
-    toggleTreeState.textContent = cc(9745);
-  } else {
-    toggleTreeState.textContent = cc(9744);
-  }
-}
-
-function displayToggleTreeState(toggleTreeState) {
-  var v = storage.get('enableTree');
-  if (v) {
-    toggleTreeState.textContent = cc(9745);
-  } else {
-    toggleTreeState.textContent = cc(9744);
-  }
-}
-
-function displayToggleSingleState(toggleSingleState) {
-  var v = storage.get('enableSingle');
-  if (v) {
-    toggleSingleState.textContent = cc(9745);
-  } else {
-    toggleSingleState.textContent = cc(9744);
-  }
 }
 
 function displayEchoFactor(echoSpan) {
   chrome.runtime.getBackgroundPage(function(bg) {
-    if (localStorage.echoFactor) {
-      bg.echoFactor = parseInt(localStorage.echoFactor, 10);
-    }
+    if (localStorage.echoFactor) bg.echoFactor = parseInt(localStorage.echoFactor, 10);
     echoSpan.textContent = bg.echoFactor.toString();
   });
 }
 
 function displayListLength(countSpan) {
   chrome.runtime.getBackgroundPage(function(bg) {
-    var len = bg.theList.length;
-    countSpan.textContent = len.toString().replace(/(\d)(?=(\d{3})+$)/, '$1,'); // add commas
+    countSpan.textContent = bg.theList.length.toString().replace(/(\d)(?=(\d{3})+$)/, '$1,');
   });
 }
 
@@ -132,108 +73,70 @@ function dec(cb) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  var siteName          = document.getElementById('siteName');
-  var toggle            = document.getElementById('toggle');
-  var toggleState       = document.getElementById('toggleState');
-  var toggleCase        = document.getElementById('toggleCase');
-  var toggleCaseState   = document.getElementById('toggleCaseState');
+  var siteName    = document.getElementById('siteName');
+  var toggle      = document.getElementById('toggle');
+  var toggleState = document.getElementById('toggleState');
   var toggleJudas       = document.getElementById('toggleJudas');
   var toggleJudasState  = document.getElementById('toggleJudasState');
-  var toggleTree        = document.getElementById('toggleTree');
-  var toggleTreeState   = document.getElementById('toggleTreeState');
-  var toggleSingle      = document.getElementById('toggleSingle');
-  var toggleSingleState = document.getElementById('toggleSingleState');
-  var echoSpan          = document.getElementById('echo');
-  var incSpan           = document.getElementById('inc');
-  var decSpan           = document.getElementById('dec');
-  var countSpan         = document.getElementById('count');
-  var refresh           = document.getElementById('refresh');
-  var loading           = document.getElementById('loading');
-  var versionSpan       = document.getElementById('version');
+  var echoSpan    = document.getElementById('echo');
+  var incSpan     = document.getElementById('inc');
+  var decSpan     = document.getElementById('dec');
+  var countSpan   = document.getElementById('count');
+  var refresh     = document.getElementById('refresh');
+  var loading     = document.getElementById('loading');
+  var versionSpan = document.getElementById('version');
+
+  chrome.runtime.getBackgroundPage(function(bg) {
+    bg.enableTree = true;
+    bg.enableSingle = true;
+    storage.set('enableTree', true);
+    storage.set('enableSingle', true);
+  });
 
   getActiveTabHostname(function(err, hostname) {
-    if (hostname) {
-      siteName.textContent = hostname;
-    } else {
-      siteName.textContent = "This Site";
-    }
+    siteName.textContent = hostname || "This Site";
   });
 
   displayToggleState(toggleState);
-  displayToggleCaseState(toggleCaseState);
-  displayToggleTreeState(toggleTreeState);
-  displayToggleSingleState(toggleSingleState);
   displayEchoFactor(echoSpan);
   displayListLength(countSpan);
   displayVersion(versionSpan);
 
-  toggle.addEventListener('click', function(ev) {
+  toggle.addEventListener('click', function() {
     chrome.runtime.getBackgroundPage(function(bg) {
       getActiveTabHostname(function(err, hostname) {
-        if (hostname) {
-          var val = localStorage[hostname];
-          if (val) {
-            localStorage.removeItem(hostname);
-          } else {
-            localStorage[hostname] = 1;
-          }
-          displayToggleState(toggleState);
+        if (!hostname) return;
+        if (localStorage[hostname]) {
+          localStorage.removeItem(hostname);
+        } else {
+          localStorage[hostname] = 1;
         }
+        displayToggleState(toggleState);
       });
     });
   });
 
-  toggleCase.addEventListener('click', function(ev) {
-    chrome.runtime.getBackgroundPage(function(bg) {
-      bg.caseSensitivity = storage.toggle('caseSensitivity');
-      bg.loaded = false;
-      displayToggleCaseState(toggleCaseState);
-    });
-  });
-
-  toggleTree.addEventListener('click', function(ev) {
-    chrome.runtime.getBackgroundPage(function(bg) {
-      bg.enableTree = storage.toggle('enableTree');
-      displayToggleTreeState(toggleTreeState);
-      if (bg.enableTree) {
-        bg.enableJudasWatch = storage.set('enableJudasWatch', false);
-      }
-    });
-  });
-
-  toggleSingle.addEventListener('click', function(ev) {
-    chrome.runtime.getBackgroundPage(function(bg) {
-      bg.enableSingle = storage.toggle('enableSingle');
-      bg.loaded = false; // reload the list next time
-      displayToggleSingleState(toggleSingleState);
-    });
-  });
-
-  incSpan.addEventListener('click', function(ev) {
+  incSpan.addEventListener('click', function() {
     inc(function(err, echoFactor) {
       echoSpan.textContent = echoFactor.toString();
     });
   });
 
-  decSpan.addEventListener('click', function(ev) {
+  decSpan.addEventListener('click', function() {
     dec(function(err, echoFactor) {
       echoSpan.textContent = echoFactor.toString();
     });
   });
 
-  refresh.addEventListener('click', function(ev) {
+  refresh.addEventListener('click', function() {
     loading.className = "";
     refresh.className = "";
     chrome.runtime.getBackgroundPage(function(bg) {
-      bg.loadTheList(function(err){
-        if (err) {
-          refresh.className = "error";
-        }
+      bg.loadTheList(function(err) {
+        if (err) refresh.className = "error";
         displayListLength(countSpan);
-        bg.loadTheTree(function(err){
-          if (err) {
-            refresh.className = "error";
-          }
+        bg.loadTheTree(function(err) {
+          if (err) refresh.className = "error";
         });
         loading.className = "hidden";
       });
