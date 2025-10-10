@@ -12,7 +12,7 @@
 	},
 	"content_scripts": [
 		{
-			"js": ["myscript.js"],
+			"js": ["config.js", "content.js"],
 			"matches": ["*://*/*"],
 			"run_at": "document_end"
 		}

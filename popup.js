@@ -1,38 +1,5 @@
-const cc = String.fromCharCode;
-const CACHE_KEY = 'cdCache';
-
-const settingsConfig = [
-	{
-		type: "toggle",
-		key: "siteEnabled",
-		label: "Enable for",
-		perSite: true,
-		default: true
-	},
-	{
-		type: "toggle",
-		key: "regularsEnabled",
-		label: "Enable Regulars",
-		default: true
-	},
-	{
-		type: "toggle",
-		key: "loggingEnabled",
-		label: "Logging",
-		default: false
-	},
-	{
-		type: "number",
-		key: "echoFactor",
-		label: "Echo Factor",
-		min: 0,
-		step: 1,
-		default: 3
-	}
-];
-
 function getActiveTabHostname(cb) {
-	chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		const tab = tabs[0];
 		let hostname = "";
 		if (tab && tab.url) {
@@ -44,9 +11,7 @@ function getActiveTabHostname(cb) {
 }
 
 function getStorage(key, cb) {
-	chrome.storage.local.get(key, function(res) {
-		cb(res[key]);
-	});
+	chrome.storage.local.get(key, (res) => cb(res[key]));
 }
 
 function setStorage(key, value, cb) {
@@ -54,95 +19,108 @@ function setStorage(key, value, cb) {
 }
 
 function toggleStorage(key, cb, defaultValue = true) {
-	getStorage(key, function(value) {
+	getStorage(key, (value) => {
 		const current = typeof value === "boolean" ? value : defaultValue;
 		const newValue = !current;
-		setStorage(key, newValue, function() {
-			if (cb) cb(newValue);
-		});
+		setStorage(key, newValue, () => cb && cb(newValue));
 	});
 }
 
 function changeNumber(key, delta, cb, defaultValue = 1) {
-	getStorage(key, function(value) {
+	getStorage(key, (value) => {
 		let newValue = (value !== undefined ? value : defaultValue) + delta;
 		if (newValue < 0) newValue = 0;
-		setStorage(key, newValue, function() {
-			if (cb) cb(newValue);
-		});
+		setStorage(key, newValue, () => cb && cb(newValue));
 	});
 }
 
 function displayToggleState(element, key, defaultValue = true) {
-	getStorage(key, function(value) {
+	getStorage(key, (value) => {
 		const val = typeof value === "boolean" ? value : defaultValue;
-		element.textContent = val ? cc(9745) : cc(9744);
+		element.textContent = val ? "☑" : "☐";
 	});
 }
 
 function displayNumber(element, key, defaultValue = 1) {
-	getStorage(key, function(value) {
-		element.textContent = (value !== undefined ? value : defaultValue);
+	getStorage(key, (value) => {
+		element.textContent = value !== undefined ? value : defaultValue;
 	});
 }
 
-function createSettingElement(setting, hostname = "") {
+function displayText(element, key, defaultValue = "") {
+	getStorage(key, (value) => {
+		element.value = value !== undefined ? value : defaultValue;
+	});
+}
+
+function createSettingElement(key, hostname = "") {
+	const setting = config[key];
 	const li = document.createElement("li");
+
+	const storageKey = setting.perSite && hostname ? hostname : key;
 
 	if (setting.type === "toggle") {
 		const spanState = document.createElement("span");
-		spanState.id = `${setting.key}State`;
 		spanState.style.marginRight = "5px";
 
 		const spanLabel = document.createElement("span");
 		spanLabel.textContent = setting.label;
-		if (setting.perSite && hostname) {
-			spanLabel.innerHTML += ` <span class="setting-label">${hostname}</span>`;
-		}
+		if (setting.perSite && hostname) spanLabel.innerHTML += ` <span class="setting-label">${hostname}</span>`;
 
-		li.appendChild(spanState);
-		li.appendChild(spanLabel);
-
-		const storageKey = setting.perSite ? hostname : setting.key;
+		li.append(spanState, spanLabel);
 
 		li.addEventListener("click", () => {
-			toggleStorage(storageKey, () => {
-				displayToggleState(spanState, storageKey, setting.default);
-			}, setting.default);
+			toggleStorage(storageKey, () => displayToggleState(spanState, storageKey, setting.default), setting.default);
 		});
 
 		displayToggleState(spanState, storageKey, setting.default);
 
 	} else if (setting.type === "number") {
 		const dec = document.createElement("span");
-		dec.textContent = "◀";
-		dec.style.cursor = "pointer";
+		dec.textContent = "◀"; dec.style.cursor = "pointer";
 
 		const num = document.createElement("span");
-		num.textContent = setting.default;
-		num.style.minWidth = "30px";
-		num.style.textAlign = "center";
+		num.style.minWidth = "30px"; num.style.textAlign = "center";
 
 		const inc = document.createElement("span");
-		inc.textContent = "▶";
-		inc.style.cursor = "pointer";
+		inc.textContent = "▶"; inc.style.cursor = "pointer";
 
-		li.appendChild(dec);
-		li.appendChild(num);
-		li.appendChild(inc);
+		li.append(dec, num, inc);
 
-		displayNumber(num, setting.key, setting.default);
+		displayNumber(num, key, setting.default);
 
-		dec.addEventListener("click", () => {
-			changeNumber(setting.key, -setting.step || -1, val => num.textContent = val, setting.default);
-		});
+		dec.addEventListener("click", () => changeNumber(key, -(setting.step || 1), val => num.textContent = val, setting.default));
+		inc.addEventListener("click", () => changeNumber(key, setting.step || 1, val => num.textContent = val, setting.default));
 
-		inc.addEventListener("click", () => {
-			changeNumber(setting.key, setting.step || 1, val => num.textContent = val, setting.default);
-		});
+	} else if (setting.type === "text") {
+		const container = document.createElement("div");
+		container.style.display = "flex"; container.style.flexDirection = "column";
+
+		const label = document.createElement("span");
+		label.textContent = setting.label + ":"; label.style.marginBottom = "3px";
+
+		const input = document.createElement("input"); input.type = "text"; input.style.minWidth = "200px";
+
+		container.append(label, input); li.appendChild(container);
+
+		displayText(input, key, setting.default);
+
+		input.addEventListener("input", () => setStorage(key, input.value));
 	}
 
 	return li;
+}
+
+function ensureDefaults(cb) {
+	const keys = Object.keys(config);
+	let remaining = keys.length;
+	keys.forEach(key => {
+		const setting = config[key];
+		getStorage(key, value => {
+			if (value === undefined) setStorage(key, setting.default);
+			if (--remaining === 0 && cb) cb();
+		});
+	});
 }
 
 function displayVersion(element) {
@@ -157,7 +135,6 @@ function displayCacheElement(container) {
 	li.style.alignItems = 'flex-start';
 	li.style.gap = '5px';
 
-	// 1-я строка: Data cached + индикатор
 	const cacheRow = document.createElement('div');
 	cacheRow.style.display = 'flex';
 	cacheRow.style.alignItems = 'center';
@@ -178,6 +155,11 @@ function displayCacheElement(container) {
 	const lastUpdateSpan = document.createElement('div');
 	li.appendChild(lastUpdateSpan);
 
+	const lastUrlSpan = document.createElement('div');
+	lastUrlSpan.style.fontSize = '0.9em';
+	lastUrlSpan.style.color = '#555';
+	li.appendChild(lastUrlSpan);
+
 	const btn = document.createElement('button');
 	btn.textContent = 'Clear Cache';
 	li.appendChild(btn);
@@ -195,13 +177,20 @@ function displayCacheElement(container) {
 			} else {
 				lastUpdateSpan.textContent = "Last update: Never";
 			}
+
+			let lastUrl = "Never loaded";
+			for (const key of keys) {
+				if (cache[key]?.__lastUrl) {
+					lastUrl = cache[key].__lastUrl;
+					break;
+				}
+			}
+			lastUrlSpan.textContent = `Last loaded from: ${lastUrl}`;
 		});
 	}
 
 	btn.addEventListener('click', () => {
-		chrome.storage.local.set({ 
-			[CACHE_KEY]: { LastUpdate: Date.now() } 
-		}, () => {
+		chrome.storage.local.set({ [CACHE_KEY]: { LastUpdate: Date.now() } }, () => {
 			updateIndicator();
 		});
 	});
@@ -211,15 +200,18 @@ function displayCacheElement(container) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	const settingsList = document.getElementById("settingsList");
+	ensureDefaults(() => {
+		const settingsList = document.getElementById("settingsList");
 
-	getActiveTabHostname((hostname) => {
-		settingsConfig.forEach(setting => {
-			const el = createSettingElement(setting, hostname);
-			settingsList.appendChild(el);
+		getActiveTabHostname(hostname => {
+			Object.keys(config).forEach(key => {
+				const el = createSettingElement(key, hostname);
+				settingsList.appendChild(el);
+			});
+
+			displayCacheElement(settingsList);
 		});
-		displayCacheElement(settingsList);
-	});
 
-	displayVersion(document.getElementById("version"));
+		displayVersion(document.getElementById("version"));
+	});
 });
