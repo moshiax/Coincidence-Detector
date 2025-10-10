@@ -77,6 +77,7 @@ function isAlreadyWrapped(text, start, length) {
 
 function handleTextTree(textNode, theTree, echoFactor) {
 	if (!textNode.nodeValue) return false;
+	if (textNode._echoed) return false;
 
 	let words = textNode.nodeValue.split(/\b/);
 	let newText = "";
@@ -100,6 +101,7 @@ function handleTextTree(textNode, theTree, echoFactor) {
 	if (modified) {
 		console.log("[CD] Modified by tree:", `"${textNode.nodeValue.trim()}" → "${newText.trim()}"`);
 		textNode.nodeValue = newText;
+		textNode._echoed = true;
 		return true;
 	}
 
@@ -108,6 +110,7 @@ function handleTextTree(textNode, theTree, echoFactor) {
 
 function handleRegulars(textNode, factor) {
 	if (!textNode.nodeValue) return false;
+	if (textNode._echoed) return false;
 
 	let text = textNode.nodeValue;
 	let modified = false;
@@ -121,6 +124,7 @@ function handleRegulars(textNode, factor) {
 	if (modified) {
 		console.log("[CD] Modified by regex:", `"${textNode.nodeValue.trim()}" → "${text.trim()}"`);
 		textNode.nodeValue = text;
+		textNode._echoed = true;
 		return true;
 	}
 
@@ -157,9 +161,7 @@ function handleRegulars(textNode, factor) {
 			while (child) {
 				const next = child.nextSibling;
 				const val = child.nodeValue ?? "";
-				const hasBrackets = val.startsWith('(') && val.endsWith(')');
-
-				if (!hasBrackets) {
+				if (!child._echoed) {
 					if (handleTextTree(child, theTree, echoFactor)) {}
 					else if (regularsEnabled) handleRegulars(child, echoFactor);
 				}
