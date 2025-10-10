@@ -1,77 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
+<meta charset="UTF-8">
 <title>Coincidence Detector</title>
-<script type="text/javascript" src="popup.js"></script>
-<style type="text/css">
-body {
-  font-family: Ubuntu, Arial, sans-serif;
-  background-color: #f9f9f9;
-  padding: 15px 10px;
-  font-size: .85em;
-}
-
-h1 {
-  font-size: 1.6em;
-  white-space: nowrap;
-  margin: 0 0.25em;
-  color: #444;
-  font-weight: 200;
-}
-
-#controls ul {
-  padding: 0;
-}
-
-#controls ul li {
-  line-height: 2.1em;
-  list-style-type: none;
-  text-indent: 29px;
-  cursor: pointer;
-  color: #1488ff;
-  transition: all .2s ease-out;
-}
-
-#controls ul li:hover {
-  background-color: #fff;
-  color: #0268df;
-  transition: none;
-}
-
-#dec, #inc {
-  transition: all .2s ease-out;
-}
-
-#echo {
-  padding: 0 5px;
-  font-size: 1.2em;
-}
-
-h6 {
-  position: absolute;
-  bottom: -10px;
-  right: 30px;
-  color: #888;
-}
-</style>
+<script src="popup.js" defer></script>
+<link rel="stylesheet" href="popup.css" />
 </head>
 <body>
 
 <h1>((( Coincidence Detector )))</h1>
 <div id="controls">
-  <form>
-    <ul>
-      <li id="toggle"><span id="toggleState">&#9745;</span>&nbsp;Enable&nbsp;for&nbsp;<span id="siteName">This Site</span></li>
-      <hr />
-      <li class="center">Echo Factor &nbsp; <span id="dec">&#9664;</span><span id="echo"></span> <span id="inc">&#9654;</span></li>
-      <hr />
-    </ul>
-  </form>
+  <ul id="settingsList">
+  </ul>
 </div>
 
-<h6>
-  v<span id="version">14.88.28</span>
-</h6>
+<div class="version">v<span id="version">14.88.28</span></div>
 
 </body>
 </html>
