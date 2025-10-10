@@ -1,5 +1,7 @@
 const REGULARS_REGEX = /(?<=\p{L})([\p{L}]*?)(man{1,2}|berg|stein|blatt|ман{1,2}|берг|блатт|штайн|штейн)(?!\p{L})/gu;
 
+const echoedNodes = new WeakMap();
+
 function getStorage(key, cb) {
 	chrome.storage.local.get(key, res => cb(res[key]));
 }
@@ -76,8 +78,7 @@ function isAlreadyWrapped(text, start, length) {
 }
 
 function handleTextTree(textNode, theTree, echoFactor) {
-	if (!textNode.nodeValue) return false;
-	if (textNode._echoed) return false;
+	if (!textNode.nodeValue || echoedNodes.has(textNode)) return false;
 
 	let words = textNode.nodeValue.split(/\b/);
 	let newText = "";
@@ -101,7 +102,7 @@ function handleTextTree(textNode, theTree, echoFactor) {
 	if (modified) {
 		console.log("[CD] Modified by tree:", `"${textNode.nodeValue.trim()}" → "${newText.trim()}"`);
 		textNode.nodeValue = newText;
-		textNode._echoed = true;
+		echoedNodes.set(textNode, true);
 		return true;
 	}
 
@@ -109,8 +110,7 @@ function handleTextTree(textNode, theTree, echoFactor) {
 }
 
 function handleRegulars(textNode, factor) {
-	if (!textNode.nodeValue) return false;
-	if (textNode._echoed) return false;
+	if (!textNode.nodeValue || echoedNodes.has(textNode)) return false;
 
 	let text = textNode.nodeValue;
 	let modified = false;
@@ -124,7 +124,7 @@ function handleRegulars(textNode, factor) {
 	if (modified) {
 		console.log("[CD] Modified by regex:", `"${textNode.nodeValue.trim()}" → "${text.trim()}"`);
 		textNode.nodeValue = text;
-		textNode._echoed = true;
+		echoedNodes.set(textNode, true);
 		return true;
 	}
 
@@ -160,8 +160,8 @@ function handleRegulars(textNode, factor) {
 			let child = node.firstChild;
 			while (child) {
 				const next = child.nextSibling;
-				const val = child.nodeValue ?? "";
-				if (!child._echoed) {
+
+				if (!echoedNodes.has(child)) {
 					if (handleTextTree(child, theTree, echoFactor)) {}
 					else if (regularsEnabled) handleRegulars(child, echoFactor);
 				}
