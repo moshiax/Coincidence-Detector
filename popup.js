@@ -5,7 +5,7 @@ const settingsConfig = [
 	{
 		type: "toggle",
 		key: "siteEnabled",
-		label: "Enable for Site",
+		label: "Enable for",
 		perSite: true,
 		default: true
 	},

@@ -40,21 +40,87 @@ async function loadTree(treeId = 'theTree', url = TREE_URL) {
 	}
 }
 
+const REGULARS_REGEX = /\b(\w*?)(man|berg)\b/gi;
+
+function checkName(words, obj) {
+	const word = words[words.length - 1].toLowerCase();
+	if (!(word in obj)) return [-1, 0];
+	if (obj[word] >= 0) return [1, obj[word]];
+	if (words.length >= 2) {
+		const r = checkName(words.slice(0, -1), obj[word]);
+		if (r[0] > 0) return [r[0] + 1, r[1]];
+	}
+	if ('' in obj[word]) return [1, obj[word]['']];
+	return [-1, 0];
+}
+
+function handleTextTree(textNode, theTree, echoFactor) {
+	if (!textNode.nodeValue || textNode._echoProcessed) return false;
+
+	let words = textNode.nodeValue.split(/\b/);
+	let newText = "";
+	let modified = false;
+
+	while (words.length > 0) {
+		const [count, flag] = checkName(words, theTree);
+		if (count > 0) {
+			const segment = words.slice(-count).join('');
+			newText = (flag > 0 ? echo(segment, echoFactor) : segment) + newText;
+			words = words.slice(0, -count);
+			modified ||= flag > 0;
+		} else {
+			newText = words.pop() + newText;
+		}
+	}
+
+	if (modified) {
+		console.log("[CD] Modified by tree:", `"${textNode.nodeValue.trim()}" → "${newText.trim()}"`);
+		textNode.nodeValue = newText;
+		textNode._echoProcessed = true;
+		return true;
+	}
+
+	return false;
+}
+
+function handleRegulars(textNode, factor) {
+    if (!textNode.nodeValue || textNode._echoProcessed) return false;
+
+    let text = textNode.nodeValue;
+    let modified = false;
+
+    text = text.replace(REGULARS_REGEX, (_, prefix, group) => {
+        modified = true;
+        return prefix + echo(group, factor);
+    });
+
+    if (modified) {
+        console.log("[CD] Modified by regex:", `"${textNode.nodeValue.trim()}" → "${text.trim()}"`);
+        textNode.nodeValue = text;
+        textNode._echoProcessed = true;
+        return true;
+    }
+
+    return false;
+}
+
 (async function() {
-	chrome.runtime.sendMessage({ op: "clear-title" });
-
 	const theTree = await loadTree();
-	const anchorStack = new WeakSet();
 
-	chrome.storage.local.get([location.host, 'echoFactor'], res => {
+	chrome.storage.local.get([location.host, 'echoFactor', 'regularsEnabled'], res => {
 		const echoFactor = res.echoFactor ?? 3;
 		const hostEnabled = typeof res[location.host] === 'boolean' ? res[location.host] : true;
+		const regularsEnabled = !!res.regularsEnabled;
 
 		console.log("[CD] Host:", location.host);
 		console.log("[CD] Echo factor:", echoFactor);
 		console.log("[CD] Host enabled:", hostEnabled);
+		console.log("[CD] Regulars enabled:", regularsEnabled);
 
 		if (!hostEnabled) return console.log("[CD] Site is disabled, exiting.");
+		if (echoFactor === 0) return console.log("[CD] Echo factor is 0, skipping processing.");
+
+		const anchorStack = new WeakSet();
 
 		function walk(node) {
 			if (node.nodeName === 'A') anchorStack.add(node);
@@ -63,8 +129,20 @@ async function loadTree(treeId = 'theTree', url = TREE_URL) {
 				let child = node.firstChild;
 				while (child) {
 					const next = child.nextSibling;
-					if (child.nodeType === 3 && !child._echoProcessed) handleTextTree(child);
-					else walk(child);
+
+					if (!child._echoProcessed) {
+						let modified = false;
+
+						if (handleTextTree(child, theTree, echoFactor)) modified = true;
+
+						if (!modified && regularsEnabled) {
+							if (handleRegulars(child, echoFactor)) modified = true;
+						}
+
+						if (!modified) child._echoProcessed = true;
+					}
+
+					if ([1, 9, 11].includes(child.nodeType)) walk(child);
 					child = next;
 				}
 			}
@@ -72,42 +150,8 @@ async function loadTree(treeId = 'theTree', url = TREE_URL) {
 			if (node.nodeName === 'A') anchorStack.delete(node);
 		}
 
-		function checkName(words, obj) {
-			const word = words[words.length - 1].toLowerCase();
-			if (!(word in obj)) return [-1, 0];
-			if (obj[word] >= 0) return [1, obj[word]];
-			if (words.length >= 2) {
-				const r = checkName(words.slice(0, -1), obj[word]);
-				if (r[0] > 0) return [r[0] + 1, r[1]];
-			}
-			if ('' in obj[word]) return [1, obj[word]['']];
-			return [-1, 0];
-		}
-
-		function handleTextTree(textNode) {
-			let words = textNode.nodeValue.split(/\b/);
-			let newText = "";
-			let modified = false;
-
-			while (words.length > 0) {
-				const [count, flag] = checkName(words, theTree);
-				if (count > 0) {
-					const segment = words.slice(-count).join('');
-					newText = (flag > 0 ? echo(segment, echoFactor) : segment) + newText;
-					words = words.slice(0, -count);
-					modified ||= flag > 0;
-				} else {
-					newText = words.pop() + newText;
-				}
-			}
-
-			if (modified) {
-				console.log("[CD] Modified text:", `"${textNode.nodeValue.trim()}" → "${newText.trim()}"`);
-			}
-
-			textNode.nodeValue = newText;
-			textNode._echoProcessed = true;
-		}
+		console.log("[CD] Starting tree walk...");
+		walk(document.body);
 
 		const observer = new MutationObserver(mutations => {
 			mutations.forEach(mutation => {
@@ -117,8 +161,6 @@ async function loadTree(treeId = 'theTree', url = TREE_URL) {
 			});
 		});
 
-		console.log("[CD] Starting tree walk...");
-		walk(document.body);
 		observer.observe(document.body, { childList: true, subtree: true });
 		console.log("[CD] DOM observer attached.");
 	});
