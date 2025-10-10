@@ -120,7 +120,7 @@ function handleRegulars(textNode, factor) {
 	chrome.storage.local.get([location.host, 'echoFactor', 'regularsEnabled'], res => {
 		const echoFactor = res.echoFactor ?? 3;
 		const hostEnabled = typeof res[location.host] === 'boolean' ? res[location.host] : true;
-		const regularsEnabled = !!res.regularsEnabled;
+		const regularsEnabled = typeof res.regularsEnabled === 'boolean' ? res.regularsEnabled : true;
 
 		console.log("[CD] Host:", location.host);
 		console.log("[CD] Echo factor:", echoFactor);
