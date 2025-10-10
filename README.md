@@ -30,4 +30,4 @@ Enjoy and tell your friends!  (Maybe install it on your school's computers.)
 
 Donate Bitcoin:  14QFsahfwu6W3JHokEasP6K7jFEVLH1T9M
 
-![oy vey](pics/oyvey.png)
+![oy vey](readme-pics/oyvey.png)
