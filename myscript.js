@@ -1,27 +1,41 @@
 const TREE_URL = chrome.runtime.getURL('data/theTree.json');
-const TREE_KEY = 'theTreeCache';
+const CACHE_KEY = 'cdCache';
+
+chrome.storage.local.get('loggingEnabled', res => {
+	const loggingEnabled = !!res.loggingEnabled;
+
+	const originalLog = console.log;
+	console.log = (...args) => {
+		if (loggingEnabled) originalLog.apply(console, args);
+	};
+});
 
 function echo(s, factor) {
 	return "(".repeat(factor) + s + ")".repeat(factor);
 }
 
-async function loadTree() {
-	const cached = await new Promise(resolve =>
-		chrome.storage.local.get(TREE_KEY, res => resolve(res[TREE_KEY]))
+async function loadTree(treeId = 'theTree', url = TREE_URL) {
+	const cache = await new Promise(resolve =>
+		chrome.storage.local.get(CACHE_KEY, res => resolve(res[CACHE_KEY] || {}))
 	);
-	if (cached) {
-		console.log("[CD] Loaded tree from cache");
-		return cached;
+
+	if (cache[treeId]) {
+		console.log(`[CD] Loaded ${treeId} from cache`);
+		return cache[treeId];
 	}
 
 	try {
-		const res = await fetch(TREE_URL);
+		const res = await fetch(url);
 		const tree = await res.json();
-		chrome.storage.local.set({ [TREE_KEY]: tree });
-		console.log("[CD] Loaded tree from file and cached");
+
+		cache[treeId] = tree;
+		cache.LastUpdate = Date.now();
+		chrome.storage.local.set({ [CACHE_KEY]: cache });
+
+		console.log(`[CD] Loaded ${treeId} from file and cached`);
 		return tree;
 	} catch (err) {
-		console.error("[CD] Err loading tree:", err);
+		console.error(`[CD] Err loading ${treeId}:`, err);
 		return {};
 	}
 }

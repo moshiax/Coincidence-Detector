@@ -1,35 +1,36 @@
 {
-  "manifest_version": 2,
-  "name": "Coincidence Detector",
-  "version": "14.88.28",
-  "description": "Detects Total Coincidences",
-  "browser_action": {
-    "default_icon": {
-      "38": "icons/echo-38x38.png"
-    },
-    "default_popup": "popup.html",
-    "default_title": "Coincidence Detector"
-  },
-
-  "content_scripts": [
-    {
-      "js": ["myscript.js"],
-      "matches": ["*://*/*"],
-      "run_at": "document_end"
-    }
-  ],
-
-  "icons": {
-    "16": "icons/echo-16x16.png"
-  },
-
-  "permissions": [
-    "activeTab",
-    "contextMenus",
-    "storage"
-  ],
-
-  "web_accessible_resources": [
-    "data/*.json"
-  ]
+	"manifest_version": 3,
+	"name": "Coincidence Detector",
+	"version": "14.88.28",
+	"description": "Detects Total Coincidences",
+	"action": {
+		"default_icon": {
+			"38": "icons/echo-38x38.png"
+		},
+		"default_popup": "popup.html",
+		"default_title": "Coincidence Detector"
+	},
+	"content_scripts": [
+		{
+			"js": ["myscript.js"],
+			"matches": ["*://*/*"],
+			"run_at": "document_end"
+		}
+	],
+	"icons": {
+		"16": "icons/echo-16x16.png"
+	},
+	"permissions": [
+		"storage",
+		"activeTab"
+	],
+	"host_permissions": [
+		"*://*/*"
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["data/*.json"],
+			"matches": ["<all_urls>"]
+		}
+	]
 }
