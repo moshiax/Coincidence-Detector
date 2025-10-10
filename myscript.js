@@ -10,13 +10,13 @@ chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
   var storage = state.storage;
   var anchorStack = [];
 
-  var walk = function(node) {
-    var child = node.firstChild;
-    if (node.nodeName === 'A') anchorStack.push(node.nodeName);
+  function walk(node) {
+    if (node.nodeName === 'A') anchorStack.push('A');
 
     if ([1, 9, 11].includes(node.nodeType)) {
+      let child = node.firstChild;
       while (child) {
-        var next = child.nextSibling;
+        const next = child.nextSibling;
         walk(child);
         child = next;
       }
@@ -25,53 +25,56 @@ chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
     }
 
     if (node.nodeName === 'A') anchorStack.pop();
-  };
+  }
 
-  var checkName = function(words, obj) {
-    var word = words[words.length - 1];
-    if (word in obj) {
-      if (obj[word] >= 0) return [1, obj[word]];
-      if (words.length >= 2) {
-        var r = checkName(words.slice(0, -1), obj[word]);
-        if (r[0] > 0) return [r[0] + 1, r[1]];
-      }
-      if ("" in obj[word]) return [1, obj[word][""]];
-    }
-    return [-1, 0];
-  };
+	function checkName(words, obj) {
+	  let word = words[words.length - 1].toLowerCase();
+	  if (!(word in obj)) return [-1, 0];
 
-  var handleTextTree = function(textNode) {
-    var oldtext = textNode.nodeValue;
-    var newtext = "";
-    var words = oldtext.split(/\b/);
+	  if (obj[word] >= 0) return [1, obj[word]];
+
+	  if (words.length >= 2) {
+		const r = checkName(words.slice(0, -1), obj[word]);
+		if (r[0] > 0) return [r[0] + 1, r[1]];
+	  }
+
+	  if ("" in obj[word]) return [1, obj[word][""]];
+	  return [-1, 0];
+	}
+
+
+  function handleTextTree(textNode) {
+    let words = textNode.nodeValue.split(/\b/);
+    let newText = "";
 
     while (words.length > 0) {
-      var r = checkName(words, theTree);
-      if (r[0] > 0) {
-        newtext = (r[1] > 0 ? echo(words.slice(-r[0]).join(""), echoFactor) : words.slice(-r[0]).join("")) + newtext;
-        words = words.slice(0, -r[0]);
+      const [count, flag] = checkName(words, theTree);
+      if (count > 0) {
+        const segment = words.slice(-count).join("");
+        newText = (flag > 0 ? echo(segment, echoFactor) : segment) + newText;
+        words = words.slice(0, -count);
       } else {
-        newtext = words.pop() + newtext;
+        newText = words.pop() + newText;
       }
     }
 
-    textNode.nodeValue = newtext;
-  };
+    textNode.nodeValue = newText;
+  }
 
-  var observerOptions = { childList: true, subtree: true };
-  var observer;
+  const observerOptions = { childList: true, subtree: true };
+  let observer;
 
-  var mutationHandler = function(mutations) {
-    mutations.forEach(function(m) {
-      if (m.type !== 'childList') return;
-      m.addedNodes.forEach(function(n) {
-        if (n.nodeType !== Node.ELEMENT_NODE) return;
+  function mutationHandler(mutations) {
+    mutations.forEach(mutation => {
+      if (mutation.type !== 'childList') return;
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
         observer.disconnect();
-        if (!n.isContentEditable) walk(n);
+        if (!node.isContentEditable) walk(node);
         observer.observe(document.body, observerOptions);
       });
     });
-  };
+  }
 
   if (!storage[location.host]) {
     walk(document.body);

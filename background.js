@@ -18,31 +18,10 @@ var storage = {
 };
 
 var theTree = {};
-var theList = [];
-
 var echoFactor = storage.default('echoFactor', 3);
 
-var sourceUrl = chrome.runtime.getURL('data/theList.json');
 var treeUrl = chrome.runtime.getURL('data/theTree.json');
-
-var loaded = false;
 var loadedTree = false;
-
-var pattern = '';
-
-function wordCount(s) {
-  return s.split(' ').length;
-}
-
-function wordCountGT(n) {
-  return function(s) {
-    return wordCount(s) > n;
-  };
-}
-
-function buildPattern(list) {
-  return '\\b(' + list.join('|') + ')\\b';
-}
 
 function load(url, cb) {
   var xhr = new XMLHttpRequest();
@@ -60,16 +39,6 @@ function load(url, cb) {
     cb(new Error("Could not load '" + url + "'"));
   };
   xhr.send();
-}
-
-function loadTheList(cb) {
-  load(sourceUrl, function(err, data) {
-    if (err) return cb?.(err);
-    loaded = true;
-    theList = data;
-    pattern = buildPattern(theList);
-    cb?.(null, theList);
-  });
 }
 
 function loadTheTree(cb) {
@@ -92,7 +61,6 @@ var disabledHostnames = [
 
 if (navigator.userAgent.toLowerCase().includes('chrome')) {
   chrome.runtime.onInstalled.addListener(function() {
-    loadTheList();
     loadTheTree();
     disabledHostnames.forEach(h => localStorage[h] = 1);
   });
@@ -101,11 +69,8 @@ if (navigator.userAgent.toLowerCase().includes('chrome')) {
 chrome.runtime.onMessage.addListener(function(command, sender, sendResponse) {
   switch (command.op) {
     case "load":
-      if (!loaded) loadTheList();
       if (!loadedTree) loadTheTree();
       sendResponse({
-        theList,
-        pattern,
         theTree,
         echoFactor,
         storage: localStorage
