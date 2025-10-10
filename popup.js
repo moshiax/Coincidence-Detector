@@ -66,17 +66,6 @@ function displayToggleCaseState(toggleCaseState) {
   }
 }
 
-function displayToggleJudasState(toggleJudasState) {
-  /*
-  var v = storage.get('enableJudasWatch');
-  if (v) {
-    toggleJudasState.textContent = cc(9745);
-  } else {
-    toggleJudasState.textContent = cc(9744);
-  }
-  */
-}
-
 function displayToggleTreeState(toggleTreeState) {
   var v = storage.get('enableTree');
   if (v) {
@@ -142,19 +131,6 @@ function dec(cb) {
   });
 }
 
-/*
-function restoreSavedList() {
-  chrome.runtime.getBackgroundPage(function(bg) {
-    if (localStorage.theList) {
-      bg.console.warn('restoring');
-      bg.theList = JSON.parse(localStorage.theList);
-    }
-  });
-}
-
-restoreSavedList();
-*/
-
 document.addEventListener('DOMContentLoaded', function() {
   var siteName          = document.getElementById('siteName');
   var toggle            = document.getElementById('toggle');
@@ -185,7 +161,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   displayToggleState(toggleState);
   displayToggleCaseState(toggleCaseState);
-  //displayToggleJudasState(toggleJudasState);
   displayToggleTreeState(toggleTreeState);
   displayToggleSingleState(toggleSingleState);
   displayEchoFactor(echoSpan);
@@ -216,26 +191,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  /*
-  toggleJudas.addEventListener('click', function(ev) {
-    chrome.runtime.getBackgroundPage(function(bg) {
-      bg.enableJudasWatch = storage.toggle('enableJudasWatch');
-      displayToggleJudasState(toggleJudasState);
-      if (bg.enableJudasWatch) {
-        bg.enableTree = storage.set('enableTree', false);
-        displayToggleTreeState(toggleTreeState);
-      }
-    });
-  });
-  */
-
   toggleTree.addEventListener('click', function(ev) {
     chrome.runtime.getBackgroundPage(function(bg) {
       bg.enableTree = storage.toggle('enableTree');
       displayToggleTreeState(toggleTreeState);
       if (bg.enableTree) {
         bg.enableJudasWatch = storage.set('enableJudasWatch', false);
-        //displayToggleJudasState(toggleJudasState);
       }
     });
   });
