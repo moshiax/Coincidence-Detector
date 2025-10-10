@@ -40,7 +40,7 @@ async function loadTree(treeId = 'theTree', url = TREE_URL) {
 	}
 }
 
-const REGULARS_REGEX = /\b(\w*?)(man|berg)\b/gi;
+const REGULARS_REGEX = /\b(\w*?)(man|berg|stein|blatt)\b/gi;
 
 function checkName(words, obj) {
 	const word = words[words.length - 1].toLowerCase();
@@ -54,8 +54,14 @@ function checkName(words, obj) {
 	return [-1, 0];
 }
 
+function isAlreadyWrapped(text, start, length) {
+	const before = text[start - 1] ?? '';
+	const after = text[start + length] ?? '';
+	return before === '(' && after === ')';
+}
+
 function handleTextTree(textNode, theTree, echoFactor) {
-	if (!textNode.nodeValue || textNode._echoProcessed) return false;
+	if (!textNode.nodeValue) return false;
 
 	let words = textNode.nodeValue.split(/\b/);
 	let newText = "";
@@ -65,9 +71,13 @@ function handleTextTree(textNode, theTree, echoFactor) {
 		const [count, flag] = checkName(words, theTree);
 		if (count > 0) {
 			const segment = words.slice(-count).join('');
-			newText = (flag > 0 ? echo(segment, echoFactor) : segment) + newText;
+
+			const segmentStart = newText.length === 0 ? 0 : newText.length;
+			const alreadyWrapped = isAlreadyWrapped(textNode.nodeValue, segmentStart, segment.length);
+
+			newText = (flag > 0 && !alreadyWrapped ? echo(segment, echoFactor) : segment) + newText;
 			words = words.slice(0, -count);
-			modified ||= flag > 0;
+			modified ||= flag > 0 && !alreadyWrapped;
 		} else {
 			newText = words.pop() + newText;
 		}
@@ -76,7 +86,6 @@ function handleTextTree(textNode, theTree, echoFactor) {
 	if (modified) {
 		console.log("[CD] Modified by tree:", `"${textNode.nodeValue.trim()}" → "${newText.trim()}"`);
 		textNode.nodeValue = newText;
-		textNode._echoProcessed = true;
 		return true;
 	}
 
@@ -84,24 +93,25 @@ function handleTextTree(textNode, theTree, echoFactor) {
 }
 
 function handleRegulars(textNode, factor) {
-    if (!textNode.nodeValue || textNode._echoProcessed) return false;
+	if (!textNode.nodeValue) return false;
 
-    let text = textNode.nodeValue;
-    let modified = false;
+	let text = textNode.nodeValue;
+	let modified = false;
 
-    text = text.replace(REGULARS_REGEX, (_, prefix, group) => {
-        modified = true;
-        return prefix + echo(group, factor);
-    });
+	text = text.replace(REGULARS_REGEX, (match, prefix, group, offset) => {
+		if (isAlreadyWrapped(text, offset + prefix.length, group.length)) return match;
 
-    if (modified) {
-        console.log("[CD] Modified by regex:", `"${textNode.nodeValue.trim()}" → "${text.trim()}"`);
-        textNode.nodeValue = text;
-        textNode._echoProcessed = true;
-        return true;
-    }
+		modified = true;
+		return prefix + echo(group, factor);
+	});
 
-    return false;
+	if (modified) {
+		console.log("[CD] Modified by regex:", `"${textNode.nodeValue.trim()}" → "${text.trim()}"`);
+		textNode.nodeValue = text;
+		return true;
+	}
+
+	return false;
 }
 
 (async function() {
@@ -129,17 +139,12 @@ function handleRegulars(textNode, factor) {
 				let child = node.firstChild;
 				while (child) {
 					const next = child.nextSibling;
+					const val = child.nodeValue ?? "";
+					const hasBrackets = val.startsWith('(') && val.endsWith(')');
 
-					if (!child._echoProcessed) {
-						let modified = false;
-
-						if (handleTextTree(child, theTree, echoFactor)) modified = true;
-
-						if (!modified && regularsEnabled) {
-							if (handleRegulars(child, echoFactor)) modified = true;
-						}
-
-						if (!modified) child._echoProcessed = true;
+					if (!hasBrackets) {
+						if (handleTextTree(child, theTree, echoFactor)) { }
+						else if (regularsEnabled) handleRegulars(child, echoFactor);
 					}
 
 					if ([1, 9, 11].includes(child.nodeType)) walk(child);
