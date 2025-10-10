@@ -229,7 +229,7 @@ if (enableJudasWatch && enableTree) {
 }
 
 var sourceUrls = [
-  'https://coincidencedetector.com/theList.json'
+  chrome.runtime.getURL('data/theList.json')
 ];
 
 var judasUrls = [
@@ -237,7 +237,7 @@ var judasUrls = [
 ];
 
 var treeUrls = [
-  'https://coincidencedetector.com/theTree.json'
+  chrome.runtime.getURL('data/theTree.json')
 ];
 
 var loaded = false;

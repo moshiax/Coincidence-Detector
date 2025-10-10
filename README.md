@@ -1,67 +1,77 @@
-# ((( Coincidence Detector )))
+The (((Coincidence Detector))) is a browser extension for Chrome, Firefox, Safari, and Opera that uses word replacement to (((echo))) Jewish names.  It was originally written by @Cuckington, and it has since been improved upon by @Perception and friends.
 
-## Branches
+![screenshot](https://i.imgur.com/W99G7aZ.png)
 
-* master      - Base for files common to all branches
-* chrome      - Fork of master for Chrome 
-* ff          - Fork of master for Firefox
-* firefox     - (deprecated) Port for Firefox using WebExtensions API
-* firefox-sdk - (deprecated) Port for Firefox using Firefox Add -on SDK
-* jse/chrome  - (deprecated) Fork of master for unreleased ✡✡✡Jewish Solidarity Enhancer✡✡✡
+### Features
 
-## Online Presence
+1. Obviously the primary feature is to detect (((names))) so you and your friends get a constant reminder of what total coincidences have occurred in the past, and continue to occur today.
+2. Echo Factor: Now you can customize the number of parentheses. Is (((3))) too Jewy? Try ((2)).
+3. Disable Function: Echoes causing a headache? Disable for the site you're on. Don't know why you'd ever do that though.
+4. REFRESH LIST: This is the most important update. The extension now calls to a (((J)))List managed by a few of us goys. To see the new additions echo properly, hit Refresh List!
+5. **[Judas Watch Integration](https://judas.watch/)**:  Get more info on traitors that exist in both our (((list))) and the Judas Watch database.
+6. Tree Algorithm:  it makes the detector faster.  (Thanks to @Saturn)
+7. Match Single Words:  Those who don't like matching only on surnames can disable this for more accuracy.
+8. Case Sensitivity:  The Norwegian word for "stone" is "stein".  If that being echoed upsets you, turn on case sensitivity.  That way only "Stein" with a capital "S" will be echoed.
 
-### Sites
+### Don't be a Shabbos Goy!
 
-* https://coincidencedetector.com/ (Official Site)
-* https://gateway.ipfs.io/ipns/QmTt8KxYeMdjWg2wMHSgctuHE5uHgd8Un7dd52esK75v28/ (IPFS)
-* https://gateway.ipfs.io/ipns/coincidencedetector.com/ (IPFS)
-* https://tiny.cc/echoes (Redirect to IPFS)
-* http://127.0.0.1:43110/1As8nyiVibNzfjLiS1eCinYia2dK2ZgHiz/ (ZeroNet)
+**[Try (((Coincidence Detector))) today!](https://coincidencedetector.com/)**
 
-### Support Threads
+Download:  https://coincidencedetector.com/
 
-* https://forum.therightstuff.biz/topic/53418/coincidence-detector-support (TRS)
-* https://bbs.thegoyimknow.to/t/coincidence-detector-support/122547 (DS)
-* https://forum.thepurityspiral.com/topic/6646/coincidence-detector-support (TPS)
+Alternate download links:
 
-## Log
+* https://tiny.cc/echoes
+* https://gateway.ipfs.io/ipns/QmTt8KxYeMdjWg2wMHSgctuHE5uHgd8Un7dd52esK75v28/
 
-### A New Policy For Git Branches
+Enjoy and tell your friends!  (Maybe install it on your school's computers.)
 
-2017-07-04 :: @perception
+#### Chrome-family
 
-Something that has been bothering me for a while was the fact that the
-**master** branch and the **firefox** branch were completely disconnected even
-though their contents were very similar.  It made a lot of things like
-backporting and releasing new versions harder than it had to be, so I'm fixing
-that today.
+Chrome, Iridium, and Vivaldi users can install it by downloading it from the link above.  (Other Chrome derivatives may also be able to do this; YMMV.)
 
-Starting today:
+#### Safari
 
-* **master** will be a platform-neutral branch
-* **chrome** will be a Chrome-specific branch based on **master**
-* **ff** will be a Firefox-specific branch based on **master**
+@SJeW has a [Tampermonkey-based solution](https://greasyfork.org/en/scripts/25776-coincidence-detector)
 
-The majority of development should happen in **master** or a feature branch based on **master**
-if something drastic is being tried out.
+#### Opera
 
-When it comes time to release, I envision something like this:
+Opera users can install it using the **[Install Chrome Extensions](https://addons.opera.com/en/extensions/details/download-chrome-extension-9/?display=en)** Opera extension.
 
-```sh
-# from master
-git pull
-git checkout chrome
-git rebase master
-# then make any changes necessary to manifest.json
-git tag v14.88.26-chrome
-```
+#### Firefox
 
-For a Firefox release, you'd replace `chrome` with `ff`.
+@Cherry_Pepsi has provided a WebExtensions-based plugin which requires Firefox 46+.
 
-The only file that really needs to differ between Chrome and Firefox is
-`manifest.json`, so the **master** branch will not have a `manifest.json` going
-forward to prevent merge conflicts in the future.
+@Morpheus has provided a port that uses the Add-on SDK which older versions of Firefox can use.
 
-Hopefully, this will allow me and future maintainers to release new versions of
-the Coincidence Detector more efficiently.
+### Special Thanks
+
+@galford for building the home page.
+
+@Dr-Pepe for registering the domain.
+
+@SPF-1488 for good advice and help with the servers.
+
+@K.M for development support.
+
+Everyone who has contributed names and evidence.  Thank you all.
+
+### Naming the Jews
+
+If you come across a name that belongs on the list, post their name and a link to evidence of their Jewishness here.  We'll do our best to keep the list up to date.
+
+You can also email names and evidence to coincidence@protonmail.com .
+
+### Donations
+
+Donate Bitcoin:  14QFsahfwu6W3JHokEasP6K7jFEVLH1T9M
+
+Help with our server bills.
+
+### Follow the Drama on Twitter
+
+#### [#CoincidenceDetector](https://twitter.com/hashtag/CoincidenceDetector?src=hash) (#hashtag)
+
+#### [coincidence detector](https://twitter.com/search?q=coincidence%20detector&src=typd) (text search) (I prefer this.)
+
+![oy vey](http://i.imgur.com/pMkbzi0.png)
