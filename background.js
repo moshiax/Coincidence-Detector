@@ -25,20 +25,13 @@ var caseSensitivity = storage.default('caseSensitivity', false);
 var enableTree = storage.default('enableTree', true);
 var enableSingle = storage.default('enableSingle', true);
 
-var sourceUrls = [chrome.runtime.getURL('data/theList.json')];
-var treeUrls = [chrome.runtime.getURL('data/theTree.json')];
+var sourceUrl = chrome.runtime.getURL('data/theList.json');
+var treeUrl = chrome.runtime.getURL('data/theTree.json');
 
 var loaded = false;
 var loadedTree = false;
 
-if (localStorage.theList) {
-  try { theList = JSON.parse(localStorage.theList); } catch {}
-}
-if (localStorage.theTree) {
-  try { theTree = JSON.parse(localStorage.theTree); } catch {}
-}
-
-var pattern = buildPattern(theList);
+var pattern = '';
 
 function wordCount(s) {
   return s.split(' ').length;
@@ -75,22 +68,20 @@ function load(url, cb) {
 }
 
 function loadTheList(cb) {
-  load(sourceUrls[0], function(err, data) {
+  load(sourceUrl, function(err, data) {
     if (err) return cb?.(err);
     loaded = true;
     theList = data;
     pattern = buildPattern(theList);
-    localStorage.theList = JSON.stringify(data);
     cb?.(null, theList);
   });
 }
 
 function loadTheTree(cb) {
-  load(treeUrls[0], function(err, data) {
+  load(treeUrl, function(err, data) {
     if (err) return cb?.(err);
     loadedTree = true;
     theTree = data;
-    localStorage.theTree = JSON.stringify(data);
     cb?.(null, theTree);
   });
 }
@@ -115,13 +106,8 @@ if (navigator.userAgent.toLowerCase().includes('chrome')) {
 chrome.runtime.onMessage.addListener(function(command, sender, sendResponse) {
   switch (command.op) {
     case "load":
-      if (!loaded && localStorage.theList) {
-        theList = JSON.parse(localStorage.theList);
-        pattern = buildPattern(theList);
-      }
-      if (!loadedTree && localStorage.theTree) {
-        theTree = JSON.parse(localStorage.theTree);
-      }
+      if (!loaded) loadTheList();
+      if (!loadedTree) loadTheTree();
       sendResponse({
         theList,
         pattern,
