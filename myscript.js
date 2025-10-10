@@ -6,15 +6,9 @@ chrome.runtime.sendMessage(null, { op: "clear-title" });
 
 chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
   var theTree = state.theTree;
-  var caseSensitivity = state.caseSensitivity;
   var echoFactor = state.echoFactor;
   var storage = state.storage;
-  var minLength = state.enableSingle ? 0 : 1;
   var anchorStack = [];
-
-  if (!caseSensitivity) {
-    theTree = JSON.parse(JSON.stringify(theTree).toLowerCase());
-  }
 
   var walk = function(node) {
     var child = node.firstChild;
@@ -34,7 +28,7 @@ chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
   };
 
   var checkName = function(words, obj) {
-    var word = caseSensitivity ? words[words.length - 1] : words[words.length - 1].toLowerCase();
+    var word = words[words.length - 1];
     if (word in obj) {
       if (obj[word] >= 0) return [1, obj[word]];
       if (words.length >= 2) {
@@ -53,7 +47,7 @@ chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
 
     while (words.length > 0) {
       var r = checkName(words, theTree);
-      if (r[0] > minLength) {
+      if (r[0] > 0) {
         newtext = (r[1] > 0 ? echo(words.slice(-r[0]).join(""), echoFactor) : words.slice(-r[0]).join("")) + newtext;
         words = words.slice(0, -r[0]);
       } else {

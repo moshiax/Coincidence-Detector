@@ -44,12 +44,6 @@ function displayEchoFactor(echoSpan) {
   });
 }
 
-function displayListLength(countSpan) {
-  chrome.runtime.getBackgroundPage(function(bg) {
-    countSpan.textContent = bg.theList.length.toString().replace(/(\d)(?=(\d{3})+$)/, '$1,');
-  });
-}
-
 function displayVersion(versionSpan) {
   versionSpan.textContent = chrome.runtime.getManifest().version;
 }
@@ -76,22 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
   var siteName    = document.getElementById('siteName');
   var toggle      = document.getElementById('toggle');
   var toggleState = document.getElementById('toggleState');
-  var toggleJudas       = document.getElementById('toggleJudas');
-  var toggleJudasState  = document.getElementById('toggleJudasState');
   var echoSpan    = document.getElementById('echo');
   var incSpan     = document.getElementById('inc');
   var decSpan     = document.getElementById('dec');
-  var countSpan   = document.getElementById('count');
-  var refresh     = document.getElementById('refresh');
-  var loading     = document.getElementById('loading');
   var versionSpan = document.getElementById('version');
-
-  chrome.runtime.getBackgroundPage(function(bg) {
-    bg.enableTree = true;
-    bg.enableSingle = true;
-    storage.set('enableTree', true);
-    storage.set('enableSingle', true);
-  });
 
   getActiveTabHostname(function(err, hostname) {
     siteName.textContent = hostname || "This Site";
@@ -99,20 +81,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   displayToggleState(toggleState);
   displayEchoFactor(echoSpan);
-  displayListLength(countSpan);
   displayVersion(versionSpan);
 
   toggle.addEventListener('click', function() {
-    chrome.runtime.getBackgroundPage(function(bg) {
-      getActiveTabHostname(function(err, hostname) {
-        if (!hostname) return;
-        if (localStorage[hostname]) {
-          localStorage.removeItem(hostname);
-        } else {
-          localStorage[hostname] = 1;
-        }
-        displayToggleState(toggleState);
-      });
+    getActiveTabHostname(function(err, hostname) {
+      if (!hostname) return;
+      if (localStorage[hostname]) {
+        localStorage.removeItem(hostname);
+      } else {
+        localStorage[hostname] = 1;
+      }
+      displayToggleState(toggleState);
     });
   });
 
@@ -125,21 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
   decSpan.addEventListener('click', function() {
     dec(function(err, echoFactor) {
       echoSpan.textContent = echoFactor.toString();
-    });
-  });
-
-  refresh.addEventListener('click', function() {
-    loading.className = "";
-    refresh.className = "";
-    chrome.runtime.getBackgroundPage(function(bg) {
-      bg.loadTheList(function(err) {
-        if (err) refresh.className = "error";
-        displayListLength(countSpan);
-        bg.loadTheTree(function(err) {
-          if (err) refresh.className = "error";
-        });
-        loading.className = "hidden";
-      });
     });
   });
 });

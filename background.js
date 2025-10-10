@@ -21,9 +21,6 @@ var theTree = {};
 var theList = [];
 
 var echoFactor = storage.default('echoFactor', 3);
-var caseSensitivity = storage.default('caseSensitivity', false);
-var enableTree = storage.default('enableTree', true);
-var enableSingle = storage.default('enableSingle', true);
 
 var sourceUrl = chrome.runtime.getURL('data/theList.json');
 var treeUrl = chrome.runtime.getURL('data/theTree.json');
@@ -110,10 +107,7 @@ chrome.runtime.onMessage.addListener(function(command, sender, sendResponse) {
         theList,
         pattern,
         theTree,
-        enableTree,
-        caseSensitivity,
         echoFactor,
-        enableSingle,
         storage: localStorage
       });
       break;
