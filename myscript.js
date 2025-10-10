@@ -5,43 +5,41 @@ function echo(s, factor) {
 chrome.runtime.sendMessage(null, { op: "clear-title" });
 
 chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
-  var theTree = state.theTree;
-  var echoFactor = state.echoFactor;
-  var storage = state.storage;
-  var anchorStack = [];
+  const theTree = state.theTree;
+  const echoFactor = state.echoFactor;
+  const storage = state.storage;
+  const anchorStack = new WeakSet();
 
   function walk(node) {
-    if (node.nodeName === 'A') anchorStack.push('A');
+    if (node.nodeName === 'A') anchorStack.add(node);
 
     if ([1, 9, 11].includes(node.nodeType)) {
       let child = node.firstChild;
       while (child) {
         const next = child.nextSibling;
-        walk(child);
+        if (child.nodeType === 3 && !child._echoProcessed) handleTextTree(child);
+        else walk(child);
         child = next;
       }
-    } else if (node.nodeType === 3) {
-      handleTextTree(node);
     }
 
-    if (node.nodeName === 'A') anchorStack.pop();
+    if (node.nodeName === 'A') anchorStack.delete(node);
   }
 
-	function checkName(words, obj) {
-	  let word = words[words.length - 1].toLowerCase();
-	  if (!(word in obj)) return [-1, 0];
+  function checkName(words, obj) {
+    const word = words[words.length - 1].toLowerCase();
+    if (!(word in obj)) return [-1, 0];
 
-	  if (obj[word] >= 0) return [1, obj[word]];
+    if (obj[word] >= 0) return [1, obj[word]];
 
-	  if (words.length >= 2) {
-		const r = checkName(words.slice(0, -1), obj[word]);
-		if (r[0] > 0) return [r[0] + 1, r[1]];
-	  }
+    if (words.length >= 2) {
+      const r = checkName(words.slice(0, -1), obj[word]);
+      if (r[0] > 0) return [r[0] + 1, r[1]];
+    }
 
-	  if ("" in obj[word]) return [1, obj[word][""]];
-	  return [-1, 0];
-	}
-
+    if ("" in obj[word]) return [1, obj[word][""]];
+    return [-1, 0];
+  }
 
   function handleTextTree(textNode) {
     let words = textNode.nodeValue.split(/\b/);
@@ -59,26 +57,20 @@ chrome.runtime.sendMessage(null, { op: "load" }, null, function(state) {
     }
 
     textNode.nodeValue = newText;
+    textNode._echoProcessed = true;
   }
 
   const observerOptions = { childList: true, subtree: true };
-  let observer;
-
-  function mutationHandler(mutations) {
+  const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
-      if (mutation.type !== 'childList') return;
       mutation.addedNodes.forEach(node => {
-        if (node.nodeType !== Node.ELEMENT_NODE) return;
-        observer.disconnect();
-        if (!node.isContentEditable) walk(node);
-        observer.observe(document.body, observerOptions);
+        if (node.nodeType === 1 && !node.isContentEditable) walk(node);
       });
     });
-  }
+  });
 
   if (!storage[location.host]) {
     walk(document.body);
-    observer = new MutationObserver(mutationHandler);
     observer.observe(document.body, observerOptions);
   }
 });
