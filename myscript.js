@@ -13,7 +13,6 @@ chrome.runtime.sendMessage(null, {op:"load"}, null, function(state) {
   var judasSet = state.judasSet;
   var theTree = state.theTree;
   var caseSensitivity = state.caseSensitivity;
-  var enableJudasWatch = state.enableJudasWatch;
   var enableTree = state.enableTree;
   if (!enableTree) {
     var regexp = new RegExp(pattern, (caseSensitivity ? "g" : "gi"));
@@ -65,8 +64,6 @@ chrome.runtime.sendMessage(null, {op:"load"}, null, function(state) {
       case 3:
         if (enableTree) {
           handleTextTree(node);
-        } else if (enableJudasWatch && anchorStack.length == 0) {
-          handleTextJudas(node);
         } else {
           handleText(node);
         }
@@ -83,34 +80,6 @@ chrome.runtime.sendMessage(null, {op:"load"}, null, function(state) {
     v = v.replace(regexp, function(j){ count++; return echo(j, echoFactor) });
     v = v.replace(/\bIsrael\b/g, echo("Our Greatest Ally", echoFactor));
     textNode.nodeValue = v;
-  };
-
-  var handleTextJudas = function(textNode) {
-    var bk = 0;
-    var p0, p1;
-    var nextNode = textNode;
-    var v = textNode.nodeValue;
-    var originalLength = v.length;
-    v = v.replace(regexp, function(j, m0, offset, string){
-      count++;
-      var name = j.replace(/\s+/g, ' '); // normalize the name by turning repeated whitespace to one space
-      if (judasSet[name]) {
-        uniqueName = judasSet[name];
-        var a = judasDOM({ path: uniqueName, display: name });
-        p0 = nextNode.splitText(offset - bk);
-        p1 = p0.splitText(j.length);
-        nextNode.parentNode.removeChild(p0);
-        nextNode.parentNode.insertBefore(a, p1);
-        nextNode = p1;
-        bk = offset + j.length;
-      } else {
-        p0 = nextNode.splitText(offset - bk);
-        p1 = p0.splitText(j.length);
-        p0.textContent = echo(name, echoFactor);
-        nextNode = p1;
-        bk = offset + j.length;
-      }
-    });
   };
 
   var checkName = function(words, obj) {

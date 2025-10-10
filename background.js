@@ -22,13 +22,8 @@ var theList = [];
 
 var echoFactor = storage.default('echoFactor', 3);
 var caseSensitivity = storage.default('caseSensitivity', false);
-var enableJudasWatch = storage.default('enableJudasWatch', false);
 var enableTree = storage.default('enableTree', true);
 var enableSingle = storage.default('enableSingle', true);
-
-if (enableJudasWatch && enableTree) {
-  storage.set('enableJudasWatch', false);
-}
 
 var sourceUrls = [chrome.runtime.getURL('data/theList.json')];
 var treeUrls = [chrome.runtime.getURL('data/theTree.json')];
@@ -44,10 +39,6 @@ if (localStorage.theTree) {
 }
 
 var pattern = buildPattern(theList);
-
-function randomPick(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
 
 function wordCount(s) {
   return s.split(' ').length;
@@ -78,13 +69,13 @@ function load(url, cb) {
     }
   };
   xhr.onerror = function() {
-    cb(new Error("Could not load '"+url+"'"));
+    cb(new Error("Could not load '" + url + "'"));
   };
   xhr.send();
 }
 
 function loadTheList(cb) {
-  load(randomPick(sourceUrls), function(err, data) {
+  load(sourceUrls[0], function(err, data) {
     if (err) return cb?.(err);
     loaded = true;
     theList = data;
@@ -95,7 +86,7 @@ function loadTheList(cb) {
 }
 
 function loadTheTree(cb) {
-  load(randomPick(treeUrls), function(err, data) {
+  load(treeUrls[0], function(err, data) {
     if (err) return cb?.(err);
     loadedTree = true;
     theTree = data;
@@ -114,14 +105,14 @@ var disabledHostnames = [
 ];
 
 if (navigator.userAgent.toLowerCase().includes('chrome')) {
-  chrome.runtime.onInstalled.addListener(function(){
+  chrome.runtime.onInstalled.addListener(function() {
     loadTheList();
     loadTheTree();
     disabledHostnames.forEach(h => localStorage[h] = 1);
   });
 }
 
-chrome.runtime.onMessage.addListener(function(command, sender, sendResponse){
+chrome.runtime.onMessage.addListener(function(command, sender, sendResponse) {
   switch (command.op) {
     case "load":
       if (!loaded && localStorage.theList) {
@@ -131,7 +122,16 @@ chrome.runtime.onMessage.addListener(function(command, sender, sendResponse){
       if (!loadedTree && localStorage.theTree) {
         theTree = JSON.parse(localStorage.theTree);
       }
-      sendResponse({ theList, pattern, theTree, enableTree, caseSensitivity, echoFactor, enableSingle, storage: localStorage });
+      sendResponse({
+        theList,
+        pattern,
+        theTree,
+        enableTree,
+        caseSensitivity,
+        echoFactor,
+        enableSingle,
+        storage: localStorage
+      });
       break;
     case "clear-title":
       chrome.browserAction.setBadgeText({ text: '' });
