@@ -166,8 +166,10 @@ function handleRegulars(textNode, factor) {
 				const next = child.nextSibling;
 
 				if (!echoedNodes.has(child)) {
-					if (handleTextTree(child, theTree, echoFactor)) {}
-					else if (regularsEnabled) handleRegulars(child, echoFactor);
+					const handled = handleTextTree(child, theTree, echoFactor);
+					if (!handled && regularsEnabled) {
+						handleRegulars(child, echoFactor);
+					}
 				}
 
 				if ([1, 9, 11].includes(child.nodeType)) walk(child);
@@ -181,11 +183,13 @@ function handleRegulars(textNode, factor) {
 	walk(document.body);
 
 	const observer = new MutationObserver(mutations => {
-		mutations.forEach(mutation => {
-			mutation.addedNodes.forEach(node => {
-				if (node.nodeType === 1 && !node.isContentEditable) walk(node);
-			});
-		});
+		for (const mutation of mutations) {
+			for (const node of mutation.addedNodes) {
+				if (node.nodeType === 1 && !node.isContentEditable) {
+					walk(node);
+				}
+			}
+		}
 	});
 
 	observer.observe(document.body, { childList: true, subtree: true });

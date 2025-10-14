@@ -1,7 +1,7 @@
 function getActiveTabHostname(cb) {
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		const url = tabs[0]?.url;
-		const match = url?.match(/^[\w-]+:\/*\[?([\w\.:-]+)\]?(?::\d+)?/);
+		const match = url?.match(/^[\w-]+:\/*\[?([\w.:-]+)\]?(?::\d+)?/);
 		const hostname = match?.[1] ?? "";
 		cb(hostname);
 	});
@@ -113,13 +113,13 @@ function createSettingElement(key, hostname = "") {
 function ensureDefaults(cb) {
 	const keys = Object.keys(config);
 	let remaining = keys.length;
-	keys.forEach(key => {
+	for (const key of keys) {
 		const setting = config[key];
 		getStorage(key, value => {
 			if (value === undefined) setStorage(key, setting.default);
-			if (--remaining === 0 && cb) cb();
+			if (--remaining === 0) cb?.();
 		});
-	});
+	}
 }
 
 function displayVersion(element) {
@@ -201,16 +201,13 @@ function displayCacheElement(container) {
 document.addEventListener("DOMContentLoaded", () => {
 	ensureDefaults(() => {
 		const settingsList = document.getElementById("settingsList");
-
 		getActiveTabHostname(hostname => {
-			Object.keys(config).forEach(key => {
+			for (const key of Object.keys(config)) {
 				const el = createSettingElement(key, hostname);
 				settingsList.appendChild(el);
-			});
-
+			}
 			displayCacheElement(settingsList);
 		});
-
 		displayVersion(document.getElementById("version"));
 	});
 });
