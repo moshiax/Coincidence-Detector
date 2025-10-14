@@ -1,5 +1,5 @@
 const REGULARS_REGEX = /(?<=\p{L})([\p{L}]*?)(man{1,2}|berg|stein|blatt|ман{1,2}|берг|блатт|штайн|штейн)(?!\p{L})/gu;
-
+const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
 const echoedNodes = new WeakMap();
 
 function getStorage(key, cb) {
@@ -80,7 +80,7 @@ function isAlreadyWrapped(text, start, length) {
 function handleTextTree(textNode, theTree, echoFactor) {
 	if (!textNode.nodeValue || echoedNodes.has(textNode)) return false;
 
-	let words = textNode.nodeValue.split(/\b/);
+	const words = Array.from(segmenter.segment(textNode.nodeValue), s => s.segment);
 	let newText = "";
 	let modified = false;
 
@@ -92,7 +92,7 @@ function handleTextTree(textNode, theTree, echoFactor) {
 			const alreadyWrapped = isAlreadyWrapped(textNode.nodeValue, segmentStart, segment.length);
 
 			newText = (flag > 0 && !alreadyWrapped ? echo(segment, echoFactor) : segment) + newText;
-			words = words.slice(0, -count);
+			words.splice(-count, count);
 			modified ||= flag > 0 && !alreadyWrapped;
 		} else {
 			newText = words.pop() + newText;
