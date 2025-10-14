@@ -1,11 +1,8 @@
 function getActiveTabHostname(cb) {
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-		const tab = tabs[0];
-		let hostname = "";
-		if (tab && tab.url) {
-			const match = tab.url.match(/^[\w-]+:\/*\[?([\w\.:-]+)\]?(?::\d+)?/);
-			hostname = match ? match[1] : "";
-		}
+		const url = tabs[0]?.url;
+		const match = url?.match(/^[\w-]+:\/*\[?([\w\.:-]+)\]?(?::\d+)?/);
+		const hostname = match?.[1] ?? "";
 		cb(hostname);
 	});
 }
@@ -28,9 +25,11 @@ function toggleStorage(key, cb, defaultValue = true) {
 
 function changeNumber(key, delta, cb, defaultValue = 1) {
 	getStorage(key, (value) => {
-		let newValue = (value !== undefined ? value : defaultValue) + delta;
+		const base = value === undefined ? defaultValue : value;
+		let newValue = base + delta;
+
 		if (newValue < 0) newValue = 0;
-		setStorage(key, newValue, () => cb && cb(newValue));
+		setStorage(key, newValue, () => cb?.(newValue));
 	});
 }
 
@@ -43,13 +42,13 @@ function displayToggleState(element, key, defaultValue = true) {
 
 function displayNumber(element, key, defaultValue = 1) {
 	getStorage(key, (value) => {
-		element.textContent = value !== undefined ? value : defaultValue;
+		element.textContent = value === undefined ? defaultValue : value;
 	});
 }
 
 function displayText(element, key, defaultValue = "") {
 	getStorage(key, (value) => {
-		element.value = value !== undefined ? value : defaultValue;
+		element.value = value === undefined ? defaultValue : value;
 	});
 }
 

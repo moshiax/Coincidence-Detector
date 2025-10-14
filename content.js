@@ -1,4 +1,4 @@
-const REGULARS_REGEX = /(?<=\p{L})([\p{L}]*?)(man{1,2}|berg|stein|blatt|ман{1,2}|берг|блатт|штайн|штейн)(?!\p{L})/gu;
+const REGULARS_REGEX = /(?<=\p{L})(\p{L}*?)(man{1,2}|berg|stein|blatt|ман{1,2}|берг|блатт|штайн|штейн)(?!\p{L})/gu;
 const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
 const echoedNodes = new WeakMap();
 
@@ -13,7 +13,13 @@ function setStorage(key, value, cb) {
 function getSetting(key, hostname = "") {
 	const storageKey = (config[key]?.perSite && hostname) ? hostname : key;
 	return new Promise(resolve => {
-		getStorage(storageKey, value => resolve(value !== undefined ? value : config[key]?.default));
+		getStorage(storageKey, value => {
+			if (value === undefined) {
+				resolve(config[key]?.default);
+			} else {
+				resolve(value);
+			}
+		});
 	});
 }
 
@@ -60,7 +66,7 @@ async function loadTree(treeId = 'theTree') {
 }
 
 function checkName(words, obj) {
-	const word = words[words.length - 1]?.toLowerCase();
+	const word = words.at(-1)?.toLowerCase();
 	if (!(word in obj)) return [-1, 0];
 	if (obj[word] >= 0) return [1, obj[word]];
 	if (words.length >= 2) {
@@ -72,8 +78,8 @@ function checkName(words, obj) {
 }
 
 function isAlreadyWrapped(text, start, length) {
-	const before = text[start - 1] ?? '';
-	const after = text[start + length] ?? '';
+	const before = text.at(start - 1) ?? '';
+	const after = text.at(start + length) ?? '';
 	return before === '(' && after === ')';
 }
 
@@ -151,10 +157,8 @@ function handleRegulars(textNode, factor) {
 	if (echoFactor === 0) return console.log("[CD] Echo factor is 0, skipping processing.");
 
 	const theTree = await loadTree();
-	const anchorStack = new WeakSet();
 
 	function walk(node) {
-		if (node.nodeName === 'A') anchorStack.add(node);
 
 		if ([1, 9, 11].includes(node.nodeType)) {
 			let child = node.firstChild;
@@ -171,7 +175,6 @@ function handleRegulars(textNode, factor) {
 			}
 		}
 
-		if (node.nodeName === 'A') anchorStack.delete(node);
 	}
 
 	console.log("[CD] Starting tree walk...");
