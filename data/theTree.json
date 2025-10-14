@@ -119389,6 +119389,16 @@
 		}
 	},
 	"adl": 3,
+	"says": {
+		" ": {
+			"expert": 3
+		}
+	},
+	"say": {
+		" ": {
+			"experts": 3
+		}
+	},
 	"aipac": 3,
 	"aja_cortes": 3,
 	"aderet": 3,
