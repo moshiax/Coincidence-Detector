@@ -4,9 +4,6 @@
 	"version": "14.88.666",
 	"description": "Detects Total Coincidences",
 	"action": {
-		"default_icon": {
-			"38": "icons/echo-38x38.png"
-		},
 		"default_popup": "popup.html",
 		"default_title": "Coincidence Detector"
 	},
@@ -18,7 +15,7 @@
 		}
 	],
 	"icons": {
-		"16": "icons/echo-16x16.png"
+		"256": "icons/icon.png"
 	},
 	"permissions": [
 		"storage",
