@@ -19,7 +19,7 @@ function toggleStorage(key, cb, defaultValue = true) {
 	getStorage(key, (value) => {
 		const current = typeof value === "boolean" ? value : defaultValue;
 		const newValue = !current;
-		setStorage(key, newValue, () => cb && cb(newValue));
+		setStorage(key, newValue, () => cb?.(newValue));
 	});
 }
 
