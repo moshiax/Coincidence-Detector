@@ -11,23 +11,5 @@ The (((Coincidence Detector))) is a browser extension for Chrome, Firefox, Safar
 
 [![Download](https://img.shields.io/badge/Download-CRX-blue?style=for-the-badge)](https://github.com/moshiax/Coincidence-Detector/releases/latest/download/CD.crx)
 
----
-### Original Coincidence Detector
-### Don't be a Shabbos Goy!
-
-**[Try (((Coincidence Detector))) today!](https://coincidencedetector.com/)**
-
-Download:  https://coincidencedetector.com/
-
-Alternate download links:
-
-* https://tiny.cc/echoes
-* https://gateway.ipfs.io/ipns/QmTt8KxYeMdjWg2wMHSgctuHE5uHgd8Un7dd52esK75v28/
-
-Enjoy and tell your friends!  (Maybe install it on your school's computers.)
-
-### Donations to coincidencedetector.com
-
-Donate Bitcoin:  14QFsahfwu6W3JHokEasP6K7jFEVLH1T9M
-
 ![oy vey](readme-pics/oyvey.png)
+---
