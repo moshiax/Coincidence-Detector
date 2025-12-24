@@ -1,97 +1,178 @@
 body {
-  font-family: 'Ubuntu', Arial, sans-serif;
-  background-color: #f9f9f9;
-  padding: 15px;
-  font-size: 0.85em;
-  margin: 0;
-  min-width: 280px;
-  max-width: 350px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+	font-family: 'Ubuntu', Arial, sans-serif;
+	background: #f0f2f5;
+	padding: 20px 20px 0 20px;
+	margin: 0;
+	min-width: 280px;
+	max-width: 360px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 h1 {
-  font-size: 1.6em;
-  color: #444;
-  font-weight: 200;
-  margin: 0 0 15px 0;
-  white-space: nowrap;
-  text-align: center;
+	font-size: 1.5em;
+	font-weight: 400;
+	color: #333;
+	margin: 0 0 20px 0;
+	text-align: center;
+	letter-spacing: 0.5px;
 }
 
 #controls {
-  width: 100%;
-  background: #fefefe;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  padding: 10px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+	width: 100%;
+	background: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	padding: 15px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
 }
 
 #controls ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
 #controls ul li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  line-height: 2em;
-  padding: 5px 10px;
-  cursor: pointer;
-  color: #1488ff;
-  border-radius: 4px;
-  transition: background-color 0.2s, color 0.2s;
-  word-break: break-word;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 12px;
+	cursor: pointer;
+	border-radius: 8px;
+	transition: background 0.25s, color 0.25s, transform 0.15s;
+	background: #f8f9fa;
+	color: #1a73e8;
+	font-weight: 500;
 }
 
 #controls ul li:hover {
-  background-color: #fff;
-  color: #0268df;
+	background-color: #e8f0fe;
+	color: #0b59d6;
 }
 
 #echo-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-width: 100px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-width: 100px;
 }
 
 #dec, #inc {
-  cursor: pointer;
-  font-size: 1.2em;
-  user-select: none;
+	cursor: pointer;
+	font-size: 1.4em;
+	padding: 4px 8px;
+	background: #e8f0fe;
+	border-radius: 6px;
+	user-select: none;
+	transition: background 0.2s;
+}
+
+#dec:hover, #inc:hover {
+	background: #d2e3fc;
 }
 
 #echo {
-  font-size: 1.2em;
-  min-width: 30px;
-  text-align: center;
+	font-size: 1.3em;
+	min-width: 40px;
+	text-align: center;
+	font-weight: 600;
+	color: #444;
+}
+
+input[type="text"] {
+	background-color: transparent;
+	border: 1px solid #1a73e8;
+	color: #000;
+	padding: 4px 8px;
+	border-radius: 6px;
+	outline: none;
+}
+
+input[type="text"]:focus {
+	border-color: #0b59d6;
 }
 
 .setting-label {
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
-  vertical-align: middle;
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
+	vertical-align: bottom;
 }
 
 .version {
-  margin-top: 10px;
-  color: #888;
-  font-size: 0.75em;
-  width: 100%;
-  text-align: right;
+	margin-top: 15px;
+	color: #888;
+	font-size: 0.8em;
+	width: 100%;
+	text-align: right;
+	font-style: italic;
+}
+
+button {
+	cursor: pointer;
+	font-size: 0.95em;
+	padding: 6px 14px;
+	background-color: #1a73e8;
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-weight: 500;
+	transition: background-color 0.25s, box-shadow 0.2s;
+}
+
+button:hover {
+	background-color: #1665c1;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+	background-color: #145a9a;
+}
+
+.circle-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background-color: #e8f0fe;
+	color: #1a73e8;
+	font-weight: bold;
+	cursor: pointer;
+	user-select: none;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.circle-button:hover {
+	background-color: #d2e3fc;
+	color: #0b59d6;
+}
+
+.toggle-indicator {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	margin-right: 8px;
+	background-color: #f0f0f0;
+	border: 2px solid #ccc;
+	vertical-align: middle;
+	transition: background-color 0.2s, border-color 0.2s;
+}
+
+.toggle-indicator.active {
+	background-color: #1a73e8;
+	border-color: #0b59d6;
 }

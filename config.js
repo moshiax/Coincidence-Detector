@@ -4,7 +4,7 @@ const CACHE_KEY = 'cdCache';
 const config = {
 	siteEnabled: {
 		type: "toggle",
-		label: "Enable for",
+		label: "Enable for ",
 		perSite: true,
 		default: true
 	},

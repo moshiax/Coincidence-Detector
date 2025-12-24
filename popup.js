@@ -36,7 +36,7 @@ function changeNumber(key, delta, cb, defaultValue = 1) {
 function displayToggleState(element, key, defaultValue = true) {
 	getStorage(key, (value) => {
 		const val = typeof value === "boolean" ? value : defaultValue;
-		element.textContent = val ? "☑" : "☐";
+		element.classList[val ? "add" : "remove"]("active");
 	});
 }
 
@@ -60,11 +60,16 @@ function createSettingElement(key, hostname = "") {
 
 	if (setting.type === "toggle") {
 		const spanState = document.createElement("span");
-		spanState.style.marginRight = "5px";
+		spanState.classList.add("toggle-indicator");
 
 		const spanLabel = document.createElement("span");
 		spanLabel.textContent = setting.label;
-		if (setting.perSite && hostname) spanLabel.innerHTML += ` <span class="setting-label">${hostname}</span>`;
+		if (setting.perSite && hostname) {
+			const hostSpan = document.createElement("span");
+			hostSpan.className = "setting-label";
+			hostSpan.textContent = ` ${hostname}`;
+			spanLabel.appendChild(hostSpan);
+		}
 
 		li.append(spanState, spanLabel);
 
@@ -76,13 +81,16 @@ function createSettingElement(key, hostname = "") {
 
 	} else if (setting.type === "number") {
 		const dec = document.createElement("span");
-		dec.textContent = "◀"; dec.style.cursor = "pointer";
+		dec.textContent = "◀";
+		dec.classList.add("circle-button");
 
 		const num = document.createElement("span");
-		num.style.minWidth = "30px"; num.style.textAlign = "center";
+		num.style.minWidth = "30px";
+		num.style.textAlign = "center";
 
 		const inc = document.createElement("span");
-		inc.textContent = "▶"; inc.style.cursor = "pointer";
+		inc.textContent = "▶";
+		inc.classList.add("circle-button");
 
 		li.append(dec, num, inc);
 
@@ -99,6 +107,7 @@ function createSettingElement(key, hostname = "") {
 		label.textContent = setting.label + ":"; label.style.marginBottom = "3px";
 
 		const input = document.createElement("input"); input.type = "text"; input.style.minWidth = "200px";
+		input.setAttribute("spellcheck", "false");
 
 		container.append(label, input); li.appendChild(container);
 
@@ -120,10 +129,6 @@ function ensureDefaults(cb) {
 			if (--remaining === 0) cb?.();
 		});
 	}
-}
-
-function displayVersion(element) {
-	element.textContent = chrome.runtime.getManifest().version;
 }
 
 function displayCacheElement(container) {
@@ -208,6 +213,5 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 			displayCacheElement(settingsList);
 		});
-		displayVersion(document.getElementById("version"));
 	});
 });
